@@ -1,4 +1,4 @@
-package walletcore
+package main
 
 import (
 	"database/sql"
@@ -12,6 +12,7 @@ import (
 	"github.com/deirofelippe/curso-fullcycle/internal/web"
 	"github.com/deirofelippe/curso-fullcycle/internal/web/webserver"
 	"github.com/deirofelippe/curso-fullcycle/pkg/events"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 func main() {
@@ -25,7 +26,7 @@ func main() {
 	eventDispatcher := events.NewEventDispatcher()
 	transactionCreatedEvent := event.NewTransactionCreated()
 
-	eventDispatcher.Register("TransactionCreated", handler)
+	// eventDispatcher.Register("TransactionCreated", handler)
 
 	clientDb := database.NewClientDB(db)
 	accountDb := database.NewAccountDB(db)
