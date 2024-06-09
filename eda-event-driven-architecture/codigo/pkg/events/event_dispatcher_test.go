@@ -22,6 +22,9 @@ func (e *TestEvent) GetPayload() interface{} {
 	return e.Payload
 }
 
+func (e *TestEvent) SetPayload(payload interface{}) {
+}
+
 func (e *TestEvent) GetDateTime() time.Time {
 	return time.Now()
 }
