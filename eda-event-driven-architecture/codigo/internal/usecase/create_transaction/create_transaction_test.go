@@ -4,6 +4,8 @@ import (
 	"testing"
 
 	"github.com/deirofelippe/curso-fullcycle/internal/entity"
+	"github.com/deirofelippe/curso-fullcycle/internal/event"
+	"github.com/deirofelippe/curso-fullcycle/pkg/events"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -53,7 +55,10 @@ func TestCreateTransactionUsecase_Execute(t *testing.T) {
 		Amount:        100,
 	}
 
-	uc := NewCreateTransactionUsecase(mockTransaction, mockAccount)
+	dispatcher := events.NewEventDispatcher()
+	event := event.NewTransactionCreated()
+
+	uc := NewCreateTransactionUsecase(mockTransaction, mockAccount, dispatcher, event)
 	output, err := uc.Execute(inputDto)
 
 	assert.Nil(t, err)
