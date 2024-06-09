@@ -9,6 +9,8 @@ import (
 	createaccount "github.com/deirofelippe/curso-fullcycle/internal/usecase/create_account"
 	createclient "github.com/deirofelippe/curso-fullcycle/internal/usecase/create_client"
 	createtransaction "github.com/deirofelippe/curso-fullcycle/internal/usecase/create_transaction"
+	"github.com/deirofelippe/curso-fullcycle/internal/web"
+	"github.com/deirofelippe/curso-fullcycle/internal/web/webserver"
 	"github.com/deirofelippe/curso-fullcycle/pkg/events"
 )
 
@@ -31,5 +33,17 @@ func main() {
 
 	createClientUsecase := createclient.NewCreateClientUsecase(clientDb)
 	createAccountUsecase := createaccount.NewCreateAccountUsecase(accountDb, clientDb)
-	createTransactionsUsecase := createtransaction.NewCreateTransactionUsecase(transactionDb, accountDb, eventDispatcher, transactionCreatedEvent)
+	createTransactionUsecase := createtransaction.NewCreateTransactionUsecase(transactionDb, accountDb, eventDispatcher, transactionCreatedEvent)
+
+	webserver := webserver.NewWebServer(":3000")
+
+	clientHandler := web.NewWebClientHandler(*createClientUsecase)
+	accountHandler := web.NewWebAccountHandler(*createAccountUsecase)
+	transactionHandler := web.NewWebTransactionHandler(*createTransactionUsecase)
+
+	webserver.AddHandler("/clients", clientHandler.CreateClient)
+	webserver.AddHandler("/accounts", accountHandler.CreateAccount)
+	webserver.AddHandler("/transactions", transactionHandler.CreateTransaction)
+
+	webserver.Start()
 }
