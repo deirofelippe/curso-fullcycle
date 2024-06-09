@@ -3,6 +3,7 @@ package createtransaction
 import (
 	"github.com/deirofelippe/curso-fullcycle/internal/entity"
 	"github.com/deirofelippe/curso-fullcycle/internal/gateway"
+	"github.com/deirofelippe/curso-fullcycle/pkg/events"
 )
 
 type CreateTransactionInputDTO struct {
@@ -18,12 +19,21 @@ type CreateTransactionOutputDTO struct {
 type CreateTransactionUsecase struct {
 	TransactionGateway gateway.TransactionGateway
 	AccountGateway     gateway.AccountGateway
+	EventDispatcher    events.EventDispatcherInterface
+	TransactionCreated events.EventInterface
 }
 
-func NewCreateTransactionUsecase(transactionGateway gateway.TransactionGateway, accountGateway gateway.AccountGateway) *CreateTransactionUsecase {
+func NewCreateTransactionUsecase(
+	transactionGateway gateway.TransactionGateway,
+	accountGateway gateway.AccountGateway,
+	eventDispatcher events.EventDispatcherInterface,
+	transactionCreated events.EventInterface,
+) *CreateTransactionUsecase {
 	return &CreateTransactionUsecase{
 		TransactionGateway: transactionGateway,
 		AccountGateway:     accountGateway,
+		EventDispatcher:    eventDispatcher,
+		TransactionCreated: transactionCreated,
 	}
 }
 
@@ -48,5 +58,12 @@ func (uc *CreateTransactionUsecase) Execute(input CreateTransactionInputDTO) (*C
 		return nil, err
 	}
 
-	return &CreateTransactionOutputDTO{ID: transaction.ID}, nil
+	output := &CreateTransactionOutputDTO{
+		ID: transaction.ID,
+	}
+
+	uc.TransactionCreated.SetPayload(output)
+	uc.EventDispatcher.Dispatch(uc.TransactionCreated)
+
+	return output, nil
 }
