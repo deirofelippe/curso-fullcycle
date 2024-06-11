@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 
@@ -12,6 +13,7 @@ import (
 	"github.com/deirofelippe/curso-fullcycle/internal/web"
 	"github.com/deirofelippe/curso-fullcycle/internal/web/webserver"
 	"github.com/deirofelippe/curso-fullcycle/pkg/events"
+	"github.com/deirofelippe/curso-fullcycle/pkg/uow"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -30,11 +32,21 @@ func main() {
 
 	clientDb := database.NewClientDB(db)
 	accountDb := database.NewAccountDB(db)
-	transactionDb := database.NewTransactionDB(db)
+
+	ctx := context.Background()
+	uow := uow.NewUow(ctx, db)
+
+	uow.Register("AccountDB", func(tx *sql.Tx) interface{} {
+		return database.NewAccountDB(db)
+	})
+
+	uow.Register("TransactionDB", func(tx *sql.Tx) interface{} {
+		return database.NewTransactionDB(db)
+	})
 
 	createClientUsecase := createclient.NewCreateClientUsecase(clientDb)
 	createAccountUsecase := createaccount.NewCreateAccountUsecase(accountDb, clientDb)
-	createTransactionUsecase := createtransaction.NewCreateTransactionUsecase(transactionDb, accountDb, eventDispatcher, transactionCreatedEvent)
+	createTransactionUsecase := createtransaction.NewCreateTransactionUsecase(uow, eventDispatcher, transactionCreatedEvent)
 
 	webserver := webserver.NewWebServer(":3000")
 
