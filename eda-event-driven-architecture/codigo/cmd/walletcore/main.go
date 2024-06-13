@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
+	"net/http"
 
 	"github.com/deirofelippe/curso-fullcycle/internal/database"
 	"github.com/deirofelippe/curso-fullcycle/internal/event"
@@ -48,15 +50,28 @@ func main() {
 	createAccountUsecase := createaccount.NewCreateAccountUsecase(accountDb, clientDb)
 	createTransactionUsecase := createtransaction.NewCreateTransactionUsecase(uow, eventDispatcher, transactionCreatedEvent)
 
-	webserver := webserver.NewWebServer(":3000")
+	port := 3000
+	webserver := webserver.NewWebServer(fmt.Sprintf(":%d", port))
 
 	clientHandler := web.NewWebClientHandler(*createClientUsecase)
 	accountHandler := web.NewWebAccountHandler(*createAccountUsecase)
 	transactionHandler := web.NewWebTransactionHandler(*createTransactionUsecase)
 
+	webserver.AddHandler("/", func(res http.ResponseWriter, req *http.Request) {
+		hello := struct {
+			Message string
+		}{
+			Message: "Hello World!",
+		}
+		data, _ := json.Marshal(hello)
+
+		res.Header().Set("Content-Type", "application/json")
+		res.Write(data)
+	})
 	webserver.AddHandler("/clients", clientHandler.CreateClient)
 	webserver.AddHandler("/accounts", accountHandler.CreateAccount)
 	webserver.AddHandler("/transactions", transactionHandler.CreateTransaction)
 
+	fmt.Printf("Servidor criado na porta %d", port)
 	webserver.Start()
 }
