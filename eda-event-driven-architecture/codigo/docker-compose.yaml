@@ -1,18 +1,32 @@
 version: "3.8"
 
 services:
-  goapp:
-    container_name: goapp
-    build: .
+  ms-walletcore:
+    container_name: ms-walletcore
+    build:
+      context: ./walletcore
+      dockerfile: Dockerfile
     platform: linux/amd64
     volumes:
-      - .:/app
+      - ./walletcore:/app
     ports:
       - 3000:8080
       - 4000:4000
 
-  mysql:
-    container_name: mysql
+  ms-balance:
+    container_name: ms-balance
+    build:
+      context: ./balance
+      dockerfile: Dockerfile
+    platform: linux/amd64
+    volumes:
+      - ./balance:/app
+    ports:
+      - 3003:8080
+      - 4003:4000
+
+  db-walletcore:
+    container_name: db-walletcore
     image: mysql:5.7
     platform: linux/amd64
     environment:
@@ -22,7 +36,22 @@ services:
     ports:
       - 3306:3306
     volumes:
-      - .docker/mysql:/var/lib/mysql
+      - ./scripts/wallet.sql:/docker-entrypoint-initdb.d/wallet.sql
+    #   - .docker/db-walletcore:/var/lib/mysql
+
+  db-balance:
+    container_name: db-balance
+    image: mysql:5.7
+    platform: linux/amd64
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=balance
+      - MYSQL_PASSWORD=root
+    ports:
+      - 3307:3306
+    volumes:
+      - ./scripts/balance.sql:/docker-entrypoint-initdb.d/balance.sql
+      # - .docker/db-balance:/var/lib/mysql
 
   phpmyadmin:
     container_name: phpmyadmin
@@ -32,7 +61,7 @@ services:
       - 8081:80
     environment:
       - PMA_ARBITRARY=1
-      - PMA_HOST=mysql
+      - PMA_HOSTS=db-walletcore,db-balance
       - PMA_USER=root
       - PMA_PASSWORD=root
 
