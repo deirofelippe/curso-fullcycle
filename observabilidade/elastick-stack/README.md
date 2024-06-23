@@ -6,3 +6,6 @@
     - `docker network create --driver bridge observability`
 - Inicie todos os serviços
     - `docker compose up -d`
+- O arquivo `metricbeat.yml` deve ter as permissões: - rw- r-- r-- root:root
+    - sudo chown root:root metricbeat.yml
+    - sudo chmod 644 metricbeat.yml
