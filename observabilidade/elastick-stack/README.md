@@ -11,3 +11,5 @@
     - sudo chmod 644 metricbeat.yml
 - O arquivo `heartbeat.yml` deve ter as permissões: - rw- r-- r-- 
     - sudo chmod 644 heartbeat.yml
+- O arquivo `apm.yml` deve ter as permissões: - rw- r-- r-- 
+    - sudo chmod 644 apm.yml
