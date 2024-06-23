@@ -9,3 +9,5 @@
 - O arquivo `metricbeat.yml` deve ter as permissões: - rw- r-- r-- root:root
     - sudo chown root:root metricbeat.yml
     - sudo chmod 644 metricbeat.yml
+- O arquivo `heartbeat.yml` deve ter as permissões: - rw- r-- r-- 
+    - sudo chmod 644 heartbeat.yml
