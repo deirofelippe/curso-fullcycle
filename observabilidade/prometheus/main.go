@@ -5,6 +5,7 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -41,8 +42,15 @@ func main() {
 	}()
 
 	home := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		time.Sleep(time.Duration(rand.Intn(8)) * time.Second)
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("Hello Full Cycle"))
+	})
+
+	contact := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		time.Sleep(time.Duration(rand.Intn(18)) * time.Second)
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("Contact"))
 	})
 
 	d := promhttp.InstrumentHandlerDuration(
@@ -50,7 +58,13 @@ func main() {
 		promhttp.InstrumentHandlerCounter(httpRequestsTotal, home),
 	)
 
+	d2 := promhttp.InstrumentHandlerDuration(
+		httpDuration.MustCurryWith(prometheus.Labels{"handler": "contact"}),
+		promhttp.InstrumentHandlerCounter(httpRequestsTotal, contact),
+	)
+
 	http.Handle("/", d)
+	http.Handle("/contact", d2)
 	http.Handle("/metrics", promhttp.HandlerFor(r, promhttp.HandlerOpts{}))
 
 	fmt.Println("Servidor em execução na porta 8181")
