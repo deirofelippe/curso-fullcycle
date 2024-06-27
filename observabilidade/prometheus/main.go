@@ -18,9 +18,15 @@ var onlineUsers = prometheus.NewGauge(prometheus.GaugeOpts{
 	},
 })
 
+var httpRequestsTotal = prometheus.NewCounterVec(prometheus.CounterOpts{
+	Name: "goapp_http_requests_total",
+	Help: "Count of all HTTP requests for goapp",
+}, []string{})
+
 func main() {
 	r := prometheus.NewRegistry()
 	r.MustRegister(onlineUsers)
+	r.MustRegister(httpRequestsTotal)
 
 	go func() {
 		for {
@@ -28,7 +34,14 @@ func main() {
 		}
 	}()
 
+	home := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("Hello Full Cycle"))
+	})
+
+	http.Handle("/", promhttp.InstrumentHandlerCounter(httpRequestsTotal, home))
 	http.Handle("/metrics", promhttp.HandlerFor(r, promhttp.HandlerOpts{}))
+
 	fmt.Println("Servidor em execução na porta 8181")
 	log.Fatal(http.ListenAndServe(":8181", nil))
 }
