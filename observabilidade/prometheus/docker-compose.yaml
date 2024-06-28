@@ -9,7 +9,19 @@ services:
     command:
       - --config.file=/etc/prometheus/prometheus.yml
     volumes:
+      - ./alert-rules.yaml:/etc/prometheus/alert-rulers.rules
       - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+
+  alertmanager:
+    image: prom/alertmanager:v0.25.0
+    ports:
+      - 9093:9093
+    volumes:
+      - ./alert-manager.yaml:/prometheus/alertmanager.yml
+    command: 
+      - '--config.file=/prometheus/alertmanager.yml'
+    depends_on:
+      - prometheus
 
   grafana:
     image: grafana/grafana
@@ -24,20 +36,20 @@ services:
     container_name: cadvisor
     user: root
     ports:
-    - 8080:8080
+      - 8080:8080
     volumes:
-    - /:/rootfs:ro
-    - /var/run:/var/run:rw
-    - /sys:/sys:ro
-    - /var/run/docker.sock:/var/run/docker.sock
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
-    - redis
+      - redis
     
   redis:
     image: redis:latest
     container_name: redis
     ports:
-    - 6379:6379
+      - 6379:6379
     
   app:
     build: .
