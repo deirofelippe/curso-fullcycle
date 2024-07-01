@@ -2,59 +2,105 @@ version: "3.8"
 
 services:
   prometheus:
-    image: prom/prometheus
+    image: prom/prometheus:v2.45.6
     container_name: prometheus
-    ports:
-      - 9090:9090
     command:
       - --config.file=/etc/prometheus/prometheus.yml
     volumes:
       - ./alert-rules.yaml:/etc/prometheus/alert-rulers.rules
       - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - 9090:9090
+    networks:
+      - observabilidade
 
   alertmanager:
     image: prom/alertmanager:v0.25.0
-    ports:
-      - 9093:9093
+    container_name: alertmanager
     volumes:
       - ./alert-manager.yaml:/prometheus/alertmanager.yml
-    command: 
-      - '--config.file=/prometheus/alertmanager.yml'
+    command:
+      - "--config.file=/prometheus/alertmanager.yml"
     depends_on:
       - prometheus
+    ports:
+      - 9093:9093
+    networks:
+      - observabilidade
 
   grafana:
-    image: grafana/grafana
-    ports:
-      - "3000:3000"
+    image: grafana/grafana:10.2.8-ubuntu
     container_name: grafana
+    environment:
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_BASIC_ENABLED=false
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
     depends_on:
       - prometheus
+    ports:
+      - "3000:3000"
+    networks:
+      - observabilidade
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:latest
     container_name: cadvisor
     user: root
-    ports:
-      - 8080:8080
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:rw
       - /sys:/sys:ro
       - /var/run/docker.sock:/var/run/docker.sock
-    depends_on:
-      - redis
-    
-  redis:
-    image: redis:latest
-    container_name: redis
     ports:
-      - 6379:6379
-    
-  app:
-    build: .
-    container_name: app
+      - 8080:8080
+    networks:
+      - observabilidade
+
+  influxdb:
+    image: influxdb:1.8
+    container_name: influxdb
+    networks:
+      - observabilidade
+    ports:
+      - "8086:8086"
+    environment:
+      - INFLUXDB_DB=k6
+
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    container_name: mailhog
+    networks:
+      - observabilidade
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+  goapp:
+    build: ./goapp
+    container_name: goapp
+    # command: "sleep inf"
     volumes:
-      - .:/go/src
+      - ./goapp:/go/src
     ports:
       - 8181:8181
+    networks:
+      - observabilidade
+
+  nodeapp:
+    build:
+      context: ./nodeapp
+      dockerfile: Dockerfile
+    container_name: nodeapp
+    # command: "sleep inf"
+    volumes:
+      - ./nodeapp:/app
+    ports:
+      - 3002:3000
+    networks:
+      - observabilidade
+
+networks:
+  observabilidade:
+    external: true
