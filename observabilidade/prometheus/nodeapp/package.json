@@ -1,0 +1,19 @@
+{
+  "name": "app",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "npx nodemon --config ./nodemon.json"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "express": "^4.19.2",
+    "express-prometheus-middleware": "^1.2.0",
+    "nodemon": "^3.1.4",
+    "prom-client": "^13.2.0",
+    "response-time": "^2.3.2"
+  }
+}
