@@ -1,37 +1,50 @@
 global:
+  smtp_smarthost: "smtp.mailhog:1025"
+  smtp_auth_username: "receiver@email.com"
+  smtp_auth_password: "password"
+
 route:
   receiver: Default
-  group_by: ['alertname']
-  group_wait: 15s
-  group_interval: 15s
-  repeat_interval: 1m
+  group_by: ["alertname"]
+  group_wait: 15s # espera 15s e acumula os alertas para agrupar
+  group_interval: 15s # intervalo de tempo entre um alerta e outro
+  repeat_interval: 1m # intervalo de reenvio
   routes:
     - receiver: AlertaDatabase
       match:
         team: database
-    - receiver: AlertaWeb
+    - receiver: AlertaWebPorTelegram
+      match:
+        team: web
+    - receiver: AlertaWebPorEmail
       match:
         team: web
 
 receivers:
-- name: Default
-  telegram_config:
-    - bot_token: 
-      api_url:
-      chat_id:
-      parse_mode: ""
-      message: "{{ range .Alerts }}{{ .Annotations.descricao }}\n{{ end }}"
-- name: AlertaDatabase
-  telegram_config:
-    - bot_token: 
-      api_url:
-      chat_id:
-      parse_mode: ""
-      message: "{{ range .Alerts }}{{ .Annotations.descricao }}\n{{ end }}"
-- name: AlertaWeb
-  telegram_config:
-    - bot_token: 
-      api_url:
-      chat_id:
-      parse_mode: ""
-      message: "{{ range .Alerts }}{{ .Annotations.descricao }}\n{{ end }}"
+  - name: Default
+    telegram_configs:
+      - bot_token:
+        api_url: https://api.telegram.org
+        chat_id:
+        parse_mode: ""
+        message: "{{ range .Alerts }}{{ .Annotations.descricao }}\n{{ end }}"
+  - name: AlertaDatabase
+    telegram_configs:
+      - bot_token:
+        api_url: https://api.telegram.org
+        chat_id:
+        parse_mode: ""
+        message: "{{ range .Alerts }}{{ .Annotations.descricao }}\n{{ end }}"
+  - name: AlertaWebPorTelegram
+    telegram_configs:
+      - bot_token:
+        api_url: https://api.telegram.org
+        chat_id:
+        parse_mode: ""
+        message: "{{ range .Alerts }}{{ .Annotations.descricao }}\n{{ end }}"
+  - name: AlertaWebPorEmail
+    email_configs:
+      - to: "receiver@email.com"
+        from: "sender@email.com"
+        html: "<h1>Hello World!</h1>"
+        text: "Hello"

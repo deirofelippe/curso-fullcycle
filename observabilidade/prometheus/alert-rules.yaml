@@ -1,21 +1,21 @@
 groups:
-- name: Postgresql
-  rules:
-  - alert: PostgresqlDown
-    expr: pg_up != 1 or absent(pg_up) == 1
-    for: 10s
-    labels:
-      team: database
-    annotations:
-      titulo: Banco de dados postgresql fora do ar
-      descricao: O banco de dados postgresql está fora do ar
-- name: Web
-  rules:
-  - alert: WebComMuitoAcesso
-    expr: rate(http_requests_total{path="/"}[1m]) > 1
-    for: 20s
-    labels:
-      team: web
-    annotations:
-      titulo: Muitas requisições na aplicação
-      descricao: A aplicaçãoestá com muitas requisições
+  - name: Postgresql
+    rules:
+      - alert: PostgreSQLDown
+        expr: pg_up != 1 or absent(pg_up) == 1
+        for: 10s
+        labels:
+          team: database
+        annotations:
+          titulo: Banco de dados postgresql fora do ar
+          descricao: O banco de dados postgresql está fora do ar
+  - name: WebAPI
+    rules:
+      - alert: MuitoAcesso
+        expr: sum(rate(http_requests_total{instance="nodeapp:3000"}[5s])) > 100
+        for: 5s
+        labels:
+          team: web
+        annotations:
+          titulo: Muitas requisições na aplicação
+          descricao: A aplicação está com muitas requisições
