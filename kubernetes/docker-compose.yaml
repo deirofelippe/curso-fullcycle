@@ -1,0 +1,17 @@
+networks:
+  default:
+    name: fullcycle
+    driver: bridge
+
+services:
+  develop-fc:
+    image: deirofelippe/fullcycle-k8s:latest
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    container_name: develop-fc
+    command: sleep infinity
+    ports:
+      - 8000:80
+    volumes:
+      - ./:/home/devfc/app
