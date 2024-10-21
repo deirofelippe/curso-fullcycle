@@ -16,5 +16,5 @@ spec:
     spec:
       containers:
         - name: goserver
-          image: deirofelippe/fullcycle-k8s:latest
+          image: deirofelippe/fullcycle-k8s:v1
           resources: {}

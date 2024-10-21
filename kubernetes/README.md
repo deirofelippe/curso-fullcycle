@@ -13,6 +13,11 @@
 - `kubectl config use-context ns-fullcycle`
 - `kubectl apply -f k8s/pod.yaml`
 
+### Deployment commands
+
+- `kubectl rollout history deployment goserver`
+- `kubectl rollout undo deployment goserver --to-revision=2`
+
 ## Usar o DevContainers do VSCode
 
 - Abre a pasta no vscode
