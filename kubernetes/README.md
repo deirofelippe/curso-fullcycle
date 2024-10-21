@@ -12,6 +12,7 @@
 - `kubectl config set-cluster cluster-fullcycle`
 - `kubectl config use-context ns-fullcycle`
 - `kubectl apply -f k8s/pod.yaml`
+- `kubectl port-forward pod/goserver 8000:8000`
 
 ### Deployment commands
 
@@ -20,6 +21,6 @@
 
 ## Usar o DevContainers do VSCode
 
-- Abre a pasta no vscode
-- Instale a extensão DevContainers
+- Abre a pasta `./` no vscode
+- Instale a extensão Dev Containers
 - `ctlr+shift+p` `Rebuild and Reopen in Container`
