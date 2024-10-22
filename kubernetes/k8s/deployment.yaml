@@ -8,7 +8,7 @@ spec:
   selector:
     matchLabels:
       app: "goserver"
-  replicas: 2
+  replicas: 1
   template:
     metadata:
       labels:
@@ -16,5 +16,21 @@ spec:
     spec:
       containers:
         - name: goserver
-          image: deirofelippe/fullcycle-k8s:v1
+          image: deirofelippe/fullcycle-k8s:v2
           resources: {}
+          volumeMounts:
+            - mountPath: /home/devfc/app/.env
+              name: env-file-volume
+              readOnly: true
+          envFrom:
+            - configMapRef:
+                name: "goserver-env"
+      volumes:
+        - name: env-file-volume
+          configMap:
+            name: goserver-env
+            items:
+              - key: NAME
+                path: ".env"
+
+
