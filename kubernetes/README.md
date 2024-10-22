@@ -7,10 +7,7 @@
 
 ## Execução com Kubernetes
 
-- `kind create cluster --config ./k8s/kind.yaml --name cluster-fullcycle`
-- `kubectl create namespace ns-fullcycle`
-- `kubectl config set-cluster cluster-fullcycle`
-- `kubectl config use-context ns-fullcycle`
+- `kind create cluster --name fullcycle`
 - `kubectl apply -f k8s/pod.yaml`
 - `kubectl port-forward pod/goserver 8000:8000`
 
