@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: goserver
-          image: deirofelippe/fullcycle-k8s:v2
+          image: deirofelippe/fullcycle-k8s:v4.1
           resources: {}
           volumeMounts:
             - mountPath: /home/devfc/app/.env
@@ -25,6 +25,28 @@ spec:
           envFrom:
             - configMapRef:
                 name: "goserver-env"
+          startupProbe: # faz checagem se o container iniciou e pode receber as outras checagens. um container pode demorar em sua inicialização
+            httpGet:
+              path: /healthz
+              port: 8000
+            periodSeconds: 3 # vai fazer a checagem a cada X segundos
+            failureThreshold: 30 # quantas vezes a requisição precisa falhar até o container ter que ser reiniciado
+          readinessProbe: # faz checagem para identificar se a aplicação está ready, enquanto não estiver ready, o container não receberá tráfego (banco ainda não subiu, as aplicações dependentes precisam se conectar). 
+            httpGet:
+              path: /healthz
+              port: 8000
+            periodSeconds: 3 # vai fazer a checagem a cada X segundos
+            failureThreshold: 3 # quantas vezes a requisição precisa falhar até o container ter que ser reiniciado
+            timeoutSeconds: 2 # limite de X segundos de espera até a requisição terminar
+            successThreshold: 1 # quantas vezes a requisição precisa dar certo até a aplicação ser considerada pronta
+          livenessProbe: # faz checagem de requisição, se não passar nas regras o container vai ser reiniciado
+            httpGet:
+              path: /healthz
+              port: 8000
+            periodSeconds: 5 # vai fazer a checagem a cada X segundos
+            failureThreshold: 3 # quantas vezes a requisição precisa falhar até o container ter que ser reiniciado
+            timeoutSeconds: 2 # limite de X segundos de espera até a requisição terminar
+            successThreshold: 1 # quantas vezes a requisição precisa dar certo até a aplicação ser considerada pronta
       volumes:
         - name: env-file-volume
           configMap:
@@ -33,4 +55,8 @@ spec:
               - key: NAME
                 path: ".env"
 
+# faz checagens, se 
 
+# 1 
+# 2 
+# 3 quando a aplicação está no ar e para de funcionar, o container deve parar de receber tráfego
