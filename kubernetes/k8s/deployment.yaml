@@ -17,7 +17,13 @@ spec:
       containers:
         - name: goserver
           image: deirofelippe/fullcycle-k8s:v4.1
-          resources: {}
+          resources: 
+            requests:
+              cpu: 100m
+              memory: 20Mi
+            limits:
+              cpu: 500m
+              memory: 25Mi
           volumeMounts:
             - mountPath: /home/devfc/app/.env
               name: env-file-volume
@@ -30,13 +36,13 @@ spec:
               path: /healthz
               port: 8000
             periodSeconds: 3 # vai fazer a checagem a cada X segundos
-            failureThreshold: 30 # quantas vezes a requisição precisa falhar até o container ter que ser reiniciado
+            failureThreshold: 30 # quantas vezes a requisição precisa falhar até o container
           readinessProbe: # faz checagem para identificar se a aplicação está ready, enquanto não estiver ready, o container não receberá tráfego (banco ainda não subiu, as aplicações dependentes precisam se conectar). 
             httpGet:
               path: /healthz
               port: 8000
             periodSeconds: 3 # vai fazer a checagem a cada X segundos
-            failureThreshold: 3 # quantas vezes a requisição precisa falhar até o container ter que ser reiniciado
+            failureThreshold: 3 # quantas vezes a requisição precisa falhar até o container não ser ready
             timeoutSeconds: 2 # limite de X segundos de espera até a requisição terminar
             successThreshold: 1 # quantas vezes a requisição precisa dar certo até a aplicação ser considerada pronta
           livenessProbe: # faz checagem de requisição, se não passar nas regras o container vai ser reiniciado
