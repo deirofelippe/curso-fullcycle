@@ -28,6 +28,8 @@ spec:
             - mountPath: /home/devfc/app/.env
               name: env-file-volume
               readOnly: true
+            - mountPath: /go/pvc
+              name: goserver-volume
           envFrom:
             - configMapRef:
                 name: "goserver-env"
@@ -54,6 +56,9 @@ spec:
             timeoutSeconds: 2 # limite de X segundos de espera até a requisição terminar
             successThreshold: 1 # quantas vezes a requisição precisa dar certo até a aplicação ser considerada pronta
       volumes:
+        - name: goserver-volume
+          persistentVolumeClaim:
+            claimName: goserver-pvc
         - name: env-file-volume
           configMap:
             name: goserver-env
