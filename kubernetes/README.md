@@ -7,14 +7,29 @@
 
 ## Execução com Kubernetes
 
-- `kind create cluster --name fullcycle`
-- `kubectl apply -f k8s/pod.yaml`
-- `kubectl port-forward pod/goserver 8000:8000`
+### Deployment, HPA
 
-### Deployment commands
+- `kind create cluster --name fullcycle`
+- `kubectl apply -f k8s/deployment.yaml -f k8s/service.yaml -f k8s/metrics-server.yaml -f k8s/hpa.yaml -f k8s/configmap-env.yaml`
+- `kubectl port-forward service/goserver 8000:8000`
+- `watch -n 1 "kubectl get all"`
+- `watch -n 1 "kubectl top pod"`
 
 - `kubectl rollout history deployment goserver`
 - `kubectl rollout undo deployment goserver --to-revision=2`
+
+### StatefulSet
+
+> StatefulSet cria pods de forma ordenada e deleta em ordem inversa da de criação. Service Headless é usado para criar ponto de acesso em um serviço especifico, atraves do dns e sem loadbalancer `mysql-0.mysql-headless`.
+> Volumes dinâmicos que são criados conforme novos pods vão sendo criados ou volumes sendo reatachados conforme pods são destruidos e recriados.
+
+- `kubectl apply -f k8s/statefulset.yaml -f k8s/service-headless.yaml`
+- `watch -n 1 "kubectl get all"`
+- `watch -n 1 "kubectl get pvc"`
+
+### Teste de carga com Fortio
+
+- `kubectl run -it fortio --rm --image=fortio/fortio -- load -qps 800 -t 120s -c 70 "http://goserver:8000/healthz"`
 
 ## Usar o DevContainers do VSCode
 
