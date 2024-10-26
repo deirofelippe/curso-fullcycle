@@ -17,7 +17,7 @@ spec:
       containers:
         - name: goserver
           image: deirofelippe/fullcycle-k8s:v4.1
-          resources: 
+          resources:
             requests:
               cpu: 100m
               memory: 20Mi
@@ -39,7 +39,7 @@ spec:
               port: 8000
             periodSeconds: 3 # vai fazer a checagem a cada X segundos
             failureThreshold: 30 # quantas vezes a requisição precisa falhar até o container
-          readinessProbe: # faz checagem para identificar se a aplicação está ready, enquanto não estiver ready, o container não receberá tráfego (banco ainda não subiu, as aplicações dependentes precisam se conectar). 
+          readinessProbe: # faz checagem para identificar se a aplicação está ready, enquanto não estiver ready, o container não receberá tráfego (banco ainda não subiu, as aplicações dependentes precisam se conectar).
             httpGet:
               path: /healthz
               port: 8000
@@ -65,9 +65,3 @@ spec:
             items:
               - key: NAME
                 path: ".env"
-
-# faz checagens, se 
-
-# 1 
-# 2 
-# 3 quando a aplicação está no ar e para de funcionar, o container deve parar de receber tráfego
