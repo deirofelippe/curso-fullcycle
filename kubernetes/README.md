@@ -39,6 +39,47 @@
 - `watch -n 1 "kubectl get all"`
 - `watch -n 1 "kubectl get pvc"`
 
+## RBAC
+
+- kubectl apply -f k8s/deployment.yaml -f k8s/security/goserver-account.yaml
+
+- Cria o context com namespace e cluster
+- kubectl config set-credentials user-admin --client-certificate=user-admin.crt --client-key=user-admin.key
+- kubectl config set-credentials user-read --client-certificate=user-read.crt --client-key=user-read.key
+
+- kubectl config set-context admin-context --cluster=kind-fullcycle --namespace=ns-fullcycle --user=user-admin
+- kubectl config set-context read-context --cluster=kind-fullcycle --namespace=ns-fullcycle --user=user-read
+
+- kubectl config use-context admin-context
+
+- Criar User
+  - openssl genrsa -out admin-user.key 2048
+  - openssl req -new -key admin-user.key -out admin-user.csr -subj "/CN=admin-user"
+  - Execute o comando para criar o CSR
+
+```bash
+cat <<EOF | kubectl apply -f -
+apiVersion: certificates.k8s.io/v1
+kind: CertificateSigningRequest
+metadata:
+    name: admin-user-csr
+spec:
+    request: $(cat admin-user.csr | base64 | tr -d '\n')
+    signerName: kubernetes.io/kube-apiserver-client
+    usages:
+    - client auth
+EOF
+```
+
+    - kubectl certificate approve admin-user-csr
+    - kubectl get csr admin-user-csr -o jsonpath='{.status.certificate}' | base64 -d > admin-user.crt
+
+- Criar ServiceAccount
+
+kubectl config set-credentials admin-user --client-certificate=admin-user.crt --client-key=admin-user.key
+kubectl config set-context admin-fullcycle --cluster=kind-fullcycle --user=admin-user --namespace=ns-fullcycle
+kubectl config use-context admin-fullcycle
+
 ## Usar o DevContainers do VSCode
 
 - Abre a pasta `./` no vscode
