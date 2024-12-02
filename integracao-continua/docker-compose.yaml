@@ -1,0 +1,11 @@
+services:
+  goapp:
+    image: golang:1.23.3-bookworm
+    container_name: goapp
+    platform: linux/amd64
+    working_dir: /app
+    command: sleep infinity
+    volumes:
+      - ./:/app
+    ports:
+      - 8080:8080
